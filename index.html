@@ -219,6 +219,10 @@
         box-shadow: none;
       }
 
+      button.loading:disabled {
+        cursor: progress;
+      }
+
       button:not(:disabled):not(.tile):hover {
         filter: brightness(1.08);
         box-shadow: 0 0 15px rgba(160, 107, 255, 0.35);
@@ -422,8 +426,8 @@
       <div class="upload-panel">
         <header>
           <h1>Ruutuysi</h1>
-          <p>
-            Valitse valmis kokoelma tai lataa omat kuvat. Sitten paina Pelaa.
+          <p style="margin-bottom: 0;">
+            Valitse valmis kokoelma tai lataa omat kuvat.
           </p>
         </header>
 
@@ -446,7 +450,7 @@
 
           <section class="card">
             <h2>Omat kuvat</h2>
-            <p>Suositeltu kuvasuhde: 1:1</p>
+            <p>Suositeltu kuvasuhde 1:1. Sivusto ei tallenna kuviasi.</p>
             <div class="controls">
               <div class="control-row">
                 <div class="file-input">
@@ -643,6 +647,22 @@
         fileCount.textContent = `${uploadedImages.length} valittu`;
       };
 
+      const setButtonLoading = (button, isLoading) => {
+        button.disabled = isLoading;
+        button.classList.toggle("loading", isLoading);
+      };
+
+      const runWithLoading = async (button, action) => {
+        setButtonLoading(button, true);
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        try {
+          await action();
+        } finally {
+          setButtonLoading(button, false);
+          updatePlayState();
+        }
+      };
+
       const applyImage = (url) => {
         imageUrl = url;
         imageSize = null;
@@ -766,18 +786,22 @@
         loadImages(event.target.files);
       });
 
-      playCollectionBtn.addEventListener("click", () => {
+      playCollectionBtn.addEventListener("click", async () => {
         const selected = collections[collectionSelect.selectedIndex];
         if (!selected) {
           return;
         }
-        useImages(selected.images);
-        enterGameView();
+        await runWithLoading(playCollectionBtn, async () => {
+          useImages(selected.images);
+          enterGameView();
+        });
       });
 
-      playOwnBtn.addEventListener("click", () => {
-        useImages(uploadedImages);
-        enterGameView();
+      playOwnBtn.addEventListener("click", async () => {
+        await runWithLoading(playOwnBtn, async () => {
+          useImages(uploadedImages);
+          enterGameView();
+        });
       });
 
       collectionSelect.addEventListener("change", () => {

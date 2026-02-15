@@ -446,6 +446,7 @@
 
           <section class="card">
             <h2>Omat kuvat</h2>
+            <p>Suositeltu kuvasuhde: 1:1</p>
             <div class="controls">
               <div class="control-row">
                 <div class="file-input">
@@ -524,6 +525,7 @@
       let uploadedImages = [];
       let currentIndex = 0;
       let imageUrl = "";
+      let imageSize = null;
       let revealed = 0;
       let isSwitching = false;
       const coverTransitionMs = 250;
@@ -567,6 +569,13 @@
         const gap = getGapSize();
         const totalWidth = tileRect.width * gridSize + gap * (gridSize - 1);
         const totalHeight = tileRect.height * gridSize + gap * (gridSize - 1);
+        const sourceWidth = imageSize ? imageSize.width : totalWidth;
+        const sourceHeight = imageSize ? imageSize.height : totalHeight;
+        const scale = Math.max(totalWidth / sourceWidth, totalHeight / sourceHeight);
+        const scaledWidth = sourceWidth * scale;
+        const scaledHeight = sourceHeight * scale;
+        const centerOffsetX = (totalWidth - scaledWidth) / 2;
+        const centerOffsetY = (totalHeight - scaledHeight) / 2;
 
         tiles.forEach((tile) => {
           const row = Number(tile.dataset.row);
@@ -574,8 +583,8 @@
           const slice = tile.querySelector(".slice");
           const offsetX = col * (tileRect.width + gap);
           const offsetY = row * (tileRect.height + gap);
-          slice.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
-          slice.style.backgroundPosition = `${-offsetX}px ${-offsetY}px`;
+          slice.style.backgroundSize = `${scaledWidth}px ${scaledHeight}px`;
+          slice.style.backgroundPosition = `${centerOffsetX - offsetX}px ${centerOffsetY - offsetY}px`;
         });
       };
 
@@ -636,10 +645,20 @@
 
       const applyImage = (url) => {
         imageUrl = url;
+        imageSize = null;
         tiles.forEach((tile) => {
           const slice = tile.querySelector(".slice");
           slice.style.backgroundImage = `url("${url}")`;
         });
+        const probe = new Image();
+        probe.onload = () => {
+          imageSize = {
+            width: probe.naturalWidth || probe.width,
+            height: probe.naturalHeight || probe.height,
+          };
+          updateSliceLayout();
+        };
+        probe.src = url;
         updateSliceLayout();
         resetReveal();
       };

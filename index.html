@@ -471,13 +471,14 @@
     const collections = [
       {
         name: "Olympialaiset",
-        images: [
-          "collections/Olympialaiset/hiihto.jpg",
-          "collections/Olympialaiset/wingsuit.jpg",
-          "collections/Olympialaiset/testi.jpg"
-        ]
+        images: ["hiihto.jpg", "wingsuit.jpg", "testi.jpg"]
       }
-    ];
+    ].map((collection) => ({
+      ...collection,
+      images: collection.images.map(
+        (filename) => `collections/${collection.name}/${filename}`
+      )
+    }));
 
     const getGapSize = () => {
       const style = getComputedStyle(grid);

@@ -280,6 +280,20 @@
         opacity: 0.7;
       }
 
+      .tile-number {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-size: clamp(2.2rem, 6vmin, 4.2rem);
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.92);
+        text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+        letter-spacing: 0.04em;
+        z-index: 2;
+        pointer-events: none;
+      }
+
       .tile .cover {
         position: absolute;
         inset: 0;
@@ -295,6 +309,10 @@
       .tile.revealed .cover {
         opacity: 0;
         pointer-events: none;
+      }
+
+      .tile.revealed .tile-number {
+        opacity: 0;
       }
 
       .tile .slice {
@@ -581,10 +599,15 @@
             const slice = document.createElement("div");
             slice.className = "slice";
 
+            const number = document.createElement("span");
+            number.className = "tile-number";
+            number.textContent = String(row * gridSize + col + 1);
+
             const cover = document.createElement("div");
             cover.className = "cover";
 
             tile.appendChild(slice);
+            tile.appendChild(number);
             tile.appendChild(cover);
             tile.addEventListener("click", () => revealTile(tile));
 

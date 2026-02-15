@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruutuysi</title>
+  <style>
+    :root {
+      --bg: #0b0b16;
+      --panel: #171a2a;
+      --panel-2: #1f2340;
+      --accent: #a06bff;
+      --text: #f4f1ff;
+      --muted: #b1a9d7;
+      --grid-gap: 5px;
+      --grid-size: min(76vmin, 520px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 20%, rgba(141, 232, 255, 0.18), transparent 45%),
+        radial-gradient(circle at 80% 10%, rgba(172, 124, 255, 0.22), transparent 40%),
+        linear-gradient(135deg, #0b0b16 0%, #14152a 60%, #0d0e1e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 15px 45px;
+    }
+
+    .wrap {
+      width: min(960px, 100%);
+      display: grid;
+      gap: 25px;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      align-items: start;
+    }
+
+    .screen {
+      width: min(900px, 100%);
+    }
+
+    .screen.hidden {
+      display: none;
+    }
+
+    .upload-panel {
+      display: grid;
+      gap: 25px;
+      align-items: start;
+    }
+
+    .upload-columns {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    header,
+    .card {
+      background: var(--panel);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.02em;
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0 0 15px 0;
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: clamp(1.6rem, 2.2vw + 1.1rem, 2.5rem);
+      letter-spacing: 0.03em;
+    }
+
+    p {
+      margin: 0 0 16px 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: grid;
+      gap: 15px;
+    }
+
+    .control-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .control-row label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .select-input {
+      width: 100%;
+      padding: 10px 15px;
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      font-weight: 600;
+    }
+
+    .file-input {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .file-input input[type="file"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    .file-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 1000px;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .file-button:hover {
+      background: rgba(160, 107, 255, 0.15);
+      border-color: rgba(160, 107, 255, 0.45);
+      box-shadow: 0 6px 18px rgba(160, 107, 255, 0.2);
+    }
+
+    .file-count {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+
+    .upload-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1 1 140px;
+      border: none;
+      border-radius: 1000px;
+      padding: 10px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #150a2a;
+      transition: filter 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    button:not(:disabled):not(.tile):hover {
+      filter: brightness(1.08);
+      box-shadow: 0 0 15px rgba(160, 107, 255, 0.35);
+    }
+
+    .stats {
+      display: flex;
+      gap: 15px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .board {
+      background: var(--panel);
+      border-radius: 40px;
+      padding: 20px;
+      width: var(--grid-size);
+      height: var(--grid-size);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .grid {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      gap: var(--grid-gap);
+      grid-template-columns: repeat(3, 1fr);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .tile {
+      position: relative;
+      border-radius: 0;
+      overflow: hidden;
+      background: #343b4b;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s ease;
+    }
+
+    .tile:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.08), transparent 60%);
+      opacity: 0.7;
+    }
+
+    /* .tile.revealed {
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      transform: scale(1.01);
+    } */
+
+    .tile .cover {
+      position: absolute;
+      inset: 0;
+      background: #6b7280;
+      opacity: 1;
+      transition: opacity 0.25s ease;
+    }
+
+    .tile:hover .cover {
+      background: #7c8494;
+    }
+
+    .tile.revealed .cover {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .tile .slice {
+      position: absolute;
+      inset: 0;
+      background-image: none;
+      background-repeat: no-repeat;
+      background-position: 0% 0%;
+    }
+
+    .game-screen {
+      position: fixed;
+      inset: 0;
+      display: none;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(141, 232, 255, 0.2), transparent 50%),
+        radial-gradient(circle at 80% 10%, rgba(172, 124, 255, 0.22), transparent 40%),
+        linear-gradient(135deg, #0b0b16 0%, #14152a 60%, #0d0e1e 100%);
+      padding: 25px;
+      z-index: 10;
+    }
+
+    .game-screen.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .game-stage {
+      display: grid;
+      place-items: center;
+    }
+
+    .game-shell {
+      width: min(90vmin, 900px);
+      display: grid;
+      gap: 15px;
+    }
+
+    .game-top,
+    .game-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .game-top .buttons,
+    .game-bottom .buttons {
+      flex: 0 0 auto;
+    }
+
+    .game-bottom .buttons button {
+      flex: 0 0 auto;
+    }
+
+    .game-bottom {
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .game-bottom #exitBtn {
+      flex: 0 0 auto;
+    }
+
+    .nav-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-count {
+      color: var(--muted);
+      font-size: 0.95rem;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .game-screen .board {
+      width: 100%;
+      height: min(90vmin, 900px);
+    }
+
+
+    @media (max-width: 900px) {
+      .upload-columns {
+        grid-template-columns: 1fr;
+      }
+
+      .board {
+        width: min(86vmin, 520px);
+        height: min(86vmin, 520px);
+        justify-self: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen" id="uploadScreen">
+    <div class="upload-panel">
+      <header>
+        <h1>Ruutuysi</h1>
+        <p>Valitse valmis kokoelma tai lataa omat kuvat. Sitten paina Pelaa.</p>
+      </header>
+
+      <div class="upload-columns">
+        <section class="card">
+          <h2>Valmiit kokoelmat</h2>
+          <div class="controls">
+            <div class="control-row">
+              <select id="collectionSelect" class="select-input" aria-label="Valitse kokoelma"></select>
+            </div>
+            <div class="buttons">
+              <button id="playCollectionBtn" disabled>Pelaa kokoelma</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Omat kuvat</h2>
+          <div class="controls">
+            <div class="control-row">
+              <div class="file-input">
+                <input id="imageInput" type="file" accept="image/*" multiple aria-label="Valitse kuvat">
+                <label for="imageInput" class="file-button">Valitse kuvat</label>
+                <span id="fileCount" class="file-count">0 valittu</span>
+              </div>
+            </div>
+            <div class="buttons">
+              <button id="playOwnBtn" disabled>Pelaa omilla</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </main>
+
+  <section class="game-screen" id="gameScreen" aria-label="Koko nayton kuvan paljastus">
+    <div class="game-stage">
+      <div class="game-shell">
+        <div class="game-top">
+          <div class="nav-row">
+            <button id="prevBtn" class="secondary">Edellinen</button>
+            <span id="imageIndex" class="nav-count">0 / 0</span>
+            <button id="nextBtn" class="secondary">Seuraava</button>
+          </div>
+        </div>
+        <section class="board" id="board" aria-label="3 x 3 kuvaruudukko">
+          <div class="grid" id="gameGrid"></div>
+        </section>
+        <div class="game-bottom">
+          <button id="exitBtn" class="secondary">Poistu</button>
+          <div class="buttons">
+            <button id="hideAllBtn" class="secondary">Piilota kaikki</button>
+            <button id="revealAllBtn" class="secondary">Paljasta kaikki</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const uploadScreen = document.getElementById("uploadScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const board = document.getElementById("board");
+    const grid = document.getElementById("gameGrid");
+    const imageInput = document.getElementById("imageInput");
+    const playCollectionBtn = document.getElementById("playCollectionBtn");
+    const playOwnBtn = document.getElementById("playOwnBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const hideAllBtn = document.getElementById("hideAllBtn");
+    const revealAllBtn = document.getElementById("revealAllBtn");
+    const exitBtn = document.getElementById("exitBtn");
+    const fileCount = document.getElementById("fileCount");
+    const imageIndex = document.getElementById("imageIndex");
+    const collectionSelect = document.getElementById("collectionSelect");
+
+    const gridSize = 3;
+    let tiles = [];
+    let images = [];
+    let uploadedImages = [];
+    let currentIndex = 0;
+    let imageUrl = "";
+    let revealed = 0;
+    let isSwitching = false;
+    const coverTransitionMs = 250;
+
+    const collections = [
+      {
+        name: "Olympialaiset",
+        images: [
+          "collections/Olympialaiset/hiihto.jpg",
+          "collections/Olympialaiset/wingsuit.jpg",
+          "collections/Olympialaiset/testi.jpg"
+        ]
+      }
+    ];
+
+    const getGapSize = () => {
+      const style = getComputedStyle(grid);
+      const gapValue = style.gap || style.columnGap || "0";
+      const gap = parseFloat(gapValue);
+      return Number.isNaN(gap) ? 0 : gap;
+    };
+
+    const updateSliceLayout = () => {
+      if (!imageUrl || tiles.length === 0) {
+        return;
+      }
+      const tileRect = tiles[0].getBoundingClientRect();
+      const gap = getGapSize();
+      const totalWidth = tileRect.width * gridSize + gap * (gridSize - 1);
+      const totalHeight = tileRect.height * gridSize + gap * (gridSize - 1);
+
+      tiles.forEach((tile) => {
+        const row = Number(tile.dataset.row);
+        const col = Number(tile.dataset.col);
+        const slice = tile.querySelector(".slice");
+        const offsetX = col * (tileRect.width + gap);
+        const offsetY = row * (tileRect.height + gap);
+        slice.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
+        slice.style.backgroundPosition = `${-offsetX}px ${-offsetY}px`;
+      });
+    };
+
+    const createTiles = () => {
+      grid.querySelectorAll(".tile").forEach((tile) => tile.remove());
+      tiles = [];
+      revealed = 0;
+
+      for (let row = 0; row < gridSize; row += 1) {
+        for (let col = 0; col < gridSize; col += 1) {
+          const tile = document.createElement("button");
+          tile.type = "button";
+          tile.className = "tile";
+          tile.setAttribute("aria-label", `Paljasta ruutu ${row * gridSize + col + 1}`);
+          tile.dataset.row = row;
+          tile.dataset.col = col;
+
+          const slice = document.createElement("div");
+          slice.className = "slice";
+
+          const cover = document.createElement("div");
+          cover.className = "cover";
+
+          tile.appendChild(slice);
+          tile.appendChild(cover);
+          tile.addEventListener("click", () => revealTile(tile));
+
+          tiles.push(tile);
+          grid.appendChild(tile);
+        }
+      }
+    };
+
+    const updateNavState = () => {
+      const hasImages = images.length > 0;
+      prevBtn.disabled = false;
+      nextBtn.disabled = false;
+      imageIndex.textContent = hasImages ? `${currentIndex + 1} / ${images.length}` : "0 / 0";
+    };
+
+    const updatePlayState = () => {
+      const selected = collections[collectionSelect.selectedIndex];
+      const hasCollection = Boolean(selected && selected.images.length > 0);
+      playCollectionBtn.disabled = !hasCollection;
+      playOwnBtn.disabled = uploadedImages.length === 0;
+      fileCount.textContent = `${uploadedImages.length} valittu`;
+    };
+
+    const applyImage = (url) => {
+      imageUrl = url;
+      tiles.forEach((tile) => {
+        const slice = tile.querySelector(".slice");
+        slice.style.backgroundImage = `url("${url}")`;
+      });
+      updateSliceLayout();
+      resetReveal();
+    };
+
+    const revealTile = (tile) => {
+      if (!imageUrl) {
+        return;
+      }
+      if (tile.classList.contains("revealed")) {
+        return;
+      }
+      tile.classList.add("revealed");
+      revealed += 1;
+    };
+
+    const resetReveal = () => {
+      tiles.forEach((tile) => tile.classList.remove("revealed"));
+      revealed = 0;
+    };
+
+    const transitionToImage = async (index) => {
+      if (isSwitching || index < 0 || index >= images.length || index === currentIndex) {
+        return;
+      }
+      isSwitching = true;
+      resetReveal();
+      updateNavState();
+      await new Promise((resolve) => setTimeout(resolve, coverTransitionMs));
+      currentIndex = index;
+      applyImage(images[currentIndex]);
+      updateNavState();
+      isSwitching = false;
+    };
+
+    const loadImages = (fileList) => {
+      const files = Array.from(fileList || []);
+      if (files.length === 0) {
+        uploadedImages = [];
+        updatePlayState();
+        return Promise.resolve();
+      }
+      const readers = files.map((file) => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => resolve(loadEvent.target.result);
+        reader.readAsDataURL(file);
+      }));
+      return Promise.all(readers).then((results) => {
+        uploadedImages = results;
+        updatePlayState();
+      });
+    };
+
+    const showImageAt = (index) => {
+      if (index < 0 || index >= images.length) {
+        return;
+      }
+      currentIndex = index;
+      applyImage(images[currentIndex]);
+      updateNavState();
+    };
+
+    const enterGameView = () => {
+      if (images.length === 0) {
+        return;
+      }
+      uploadScreen.classList.add("hidden");
+      gameScreen.classList.add("active");
+      showImageAt(currentIndex);
+    };
+
+    const exitGameView = () => {
+      gameScreen.classList.remove("active");
+      uploadScreen.classList.remove("hidden");
+    };
+
+    const useImages = (newImages) => {
+      images = [...newImages];
+      currentIndex = 0;
+      if (images.length > 0) {
+        applyImage(images[currentIndex]);
+      }
+      updateNavState();
+    };
+
+    const loadCollections = () => {
+      collectionSelect.innerHTML = "";
+      collections.forEach((collection) => {
+        const option = document.createElement("option");
+        option.value = collection.name;
+        option.textContent = `${collection.name} - ${collection.images.length} kuvaa`;
+        collectionSelect.appendChild(option);
+      });
+      updatePlayState();
+    };
+
+    imageInput.addEventListener("change", (event) => {
+      loadImages(event.target.files);
+    });
+
+    playCollectionBtn.addEventListener("click", () => {
+      const selected = collections[collectionSelect.selectedIndex];
+      if (!selected) {
+        return;
+      }
+      useImages(selected.images);
+      enterGameView();
+    });
+
+    playOwnBtn.addEventListener("click", () => {
+      useImages(uploadedImages);
+      enterGameView();
+    });
+
+    collectionSelect.addEventListener("change", () => {
+      updatePlayState();
+    });
+
+    prevBtn.addEventListener("click", () => {
+      transitionToImage(currentIndex - 1);
+    });
+
+    nextBtn.addEventListener("click", () => {
+      transitionToImage(currentIndex + 1);
+    });
+
+    hideAllBtn.addEventListener("click", () => {
+      resetReveal();
+    });
+
+    revealAllBtn.addEventListener("click", () => {
+      tiles.forEach((tile) => tile.classList.add("revealed"));
+      revealed = gridSize * gridSize;
+    });
+
+    exitBtn.addEventListener("click", () => {
+      exitGameView();
+    });
+
+    window.addEventListener("resize", () => {
+      updateSliceLayout();
+    });
+
+    createTiles();
+    updateNavState();
+    loadCollections();
+  </script>
+</body>
+</html>

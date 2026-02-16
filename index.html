@@ -40,7 +40,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 30px 15px 45px;
       }
 
       .wrap {
@@ -53,6 +52,7 @@
 
       .screen {
         width: min(900px, 100%);
+        padding: 20px;
       }
 
       .screen.hidden {
@@ -245,11 +245,19 @@
       }
 
       .board {
+        flex: 1;
+        width: 100%;
+        display: grid;
+        place-items: center;
+        container-type: size;
+      }
+
+      .board-inner {
         background: var(--panel);
         border-radius: 40px;
         padding: 20px;
-        width: var(--grid-size);
-        height: var(--grid-size);
+        width: min(100cqi, 100cqb);
+        height: min(100cqi, 100cqb);
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
         border: 1px solid rgba(255, 255, 255, 0.05);
         position: relative;
@@ -365,11 +373,15 @@
       .game-stage {
         display: grid;
         place-items: center;
+        height: 100%;
       }
 
       .game-shell {
-        width: min(90vmin, 900px);
-        display: grid;
+        width: min(92vw, 900px);
+        height: 100%;
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
         gap: 15px;
       }
 
@@ -391,8 +403,8 @@
       }
 
       .game-bottom {
-        justify-content: space-between;
-        gap: 20px;
+        justify-content: center;
+        gap: 10px;
       }
 
       .game-bottom #exitBtn {
@@ -412,20 +424,10 @@
         text-align: center;
       }
 
-      .game-screen .board {
-        width: 100%;
-        height: min(90vmin, 900px);
-      }
 
       @media (max-width: 900px) {
         .upload-columns {
           grid-template-columns: 1fr;
-        }
-
-        .board {
-          width: min(86vmin, 520px);
-          height: min(86vmin, 520px);
-          justify-self: center;
         }
       }
 
@@ -517,7 +519,9 @@
             </div>
           </div>
           <section class="board" id="board" aria-label="3 x 3 kuvaruudukko">
-            <div class="grid" id="gameGrid"></div>
+            <div class="board-inner">
+              <div class="grid" id="gameGrid"></div>
+            </div>
           </section>
           <div class="game-bottom">
             <button id="exitBtn" class="secondary">Poistu</button>

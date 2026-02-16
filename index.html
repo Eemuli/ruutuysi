@@ -693,6 +693,28 @@
         }
       };
 
+      const requestFullscreen = async () => {
+        if (document.fullscreenElement || !gameScreen.requestFullscreen) {
+          return;
+        }
+        try {
+          await gameScreen.requestFullscreen();
+        } catch (error) {
+          // Ignore fullscreen errors (browser/user may block)
+        }
+      };
+
+      const exitFullscreen = async () => {
+        if (!document.fullscreenElement || !document.exitFullscreen) {
+          return;
+        }
+        try {
+          await document.exitFullscreen();
+        } catch (error) {
+          // Ignore fullscreen errors
+        }
+      };
+
       const applyImage = (url) => {
         imageUrl = url;
         imageSize = null;
@@ -784,12 +806,14 @@
         }
         uploadScreen.classList.add("hidden");
         gameScreen.classList.add("active");
+        requestFullscreen();
         showImageAt(currentIndex);
       };
 
       const exitGameView = () => {
         gameScreen.classList.remove("active");
         uploadScreen.classList.remove("hidden");
+        exitFullscreen();
       };
 
       const useImages = (newImages) => {
@@ -857,6 +881,12 @@
 
       exitBtn.addEventListener("click", () => {
         exitGameView();
+      });
+
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement && gameScreen.classList.contains("active")) {
+          exitGameView();
+        }
       });
 
       window.addEventListener("resize", () => {
